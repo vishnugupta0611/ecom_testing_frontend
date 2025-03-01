@@ -13,22 +13,18 @@ function App() {
     description: "",
     price: "",
     category: "",
+    image: null, // Image ke liye state
   });
 
-
-
   useEffect(() => {
-
-    const getproduct = async () => {
-      const data = await fetch('https://ecom-testing-q8ge.onrender.com/api/getallproduct');
+    const getProduct = async () => {
+      const data = await fetch("https://ecom-testing-q8ge.onrender.com/api/getallproduct");
       const res = await data.json();
-      console.log("this is data", res)
-    }
+      console.log("Products Data:", res);
+    };
 
-    getproduct()
-  }, [])
-
-
+    getProduct();
+  }, []);
 
   // Fetch categories
   useEffect(() => {
@@ -39,36 +35,25 @@ function App() {
     });
   }, []);
 
-  // Fetch products
-
+  // Fetch products based on selected category
   useEffect(() => {
     const url = selectedCategory
       ? `https://ecom-testing-q8ge.onrender.com/api/getallproduct?category=${selectedCategory.value}`
       : "https://ecom-testing-q8ge.onrender.com/api/getallproduct";
 
-    console.log(selectedCategory)
-
     const fetchProducts = async () => {
       try {
         const response = await fetch(url);
         const res = await response.json();
-        console.log("this is dekho", res.data);
-        if (res.data) {
-          setProducts(res.data);
-        }
-        else{
-          setProducts([]);
-        }
-
+        console.log("Filtered Products:", res.data);
+        setProducts(res.data || []);
       } catch (err) {
         console.log("Error fetching products:", err);
       }
     };
 
-    fetchProducts(); // ✅ Function call kiya
-
+    fetchProducts();
   }, [selectedCategory]);
-
 
   const handleCreateCategory = () => {
     if (!newCategory) return alert("Enter a category name");
@@ -81,23 +66,31 @@ function App() {
       });
   };
 
+  const handleCreateProduct = async () => {
+    if (!newProduct.name || !newProduct.price || !newProduct.category || !newProduct.image)
+      return alert("Fill all fields including image!");
 
-  const handleCreateProduct = () => {
-    if (!newProduct.name || !newProduct.price || !newProduct.category)
-      return alert("Fill all fields!");
+    const formData = new FormData();
+    formData.append("name", newProduct.name);
+    formData.append("description", newProduct.description);
+    formData.append("price", newProduct.price);
+    formData.append("productid", newProduct.category);
+    formData.append("img", newProduct.image); // Image ko append kiya
 
-    axios
-      .post("https://ecom-testing-q8ge.onrender.com/api/createproduct", {
-        name: newProduct.name,
-        description: newProduct.description,
-        price: newProduct.price,
-        productid: newProduct.category,
-      })
-      .then(() => {
-        alert("Product added!");
-        setNewProduct({ name: "", description: "", price: "", category: "" });
-        window.location.reload();
-      });
+    try {
+      await axios.post(
+        "https://ecom-testing-q8ge.onrender.com/api/createproduct",
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+
+      alert("Product added!");
+      setNewProduct({ name: "", description: "", price: "", category: "", image: null });
+      window.location.reload();
+    } catch (error) {
+      console.error("Error adding product:", error);
+      alert("Failed to add product.");
+    }
   };
 
   return (
@@ -126,6 +119,7 @@ function App() {
               <h3>{product.name}</h3>
               <p>{product.description}</p>
               <p>Price: ${product.price}</p>
+              {product.image && <img src={product.image} alt={product.name} className="product-image w-[300px] h-[300px]" width={150} height={150}/>}
             </div>
           ))
         )}
@@ -174,6 +168,14 @@ function App() {
           options={categories}
           onChange={(option) =>
             setNewProduct({ ...newProduct, category: option.value })
+          }
+        />
+        {/* Image Upload Field */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) =>
+            setNewProduct({ ...newProduct, image: e.target.files[0] })
           }
         />
         <button onClick={handleCreateProduct}>Add Product</button>

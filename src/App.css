@@ -53,6 +53,11 @@ body {
 .product-card {
   background: white;
   padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
   border-radius: 8px;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
   text-align: center;
