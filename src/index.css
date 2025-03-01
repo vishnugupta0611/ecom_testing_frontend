@@ -17,11 +17,23 @@ body {
   color: #1a1a1a;
   font-weight: 500;
   align-items: center;
+  justify-content: center;
   padding: 0 30px;
 }
 
 .navbar div {
   display: flex;
   gap: 5rem;
- font-weight: 500;
+  font-weight: 500;
+
+}
+
+@media (max-width: 600px) {
+  .navbar div {
+    display: none !important;  /* ✅ Forcefully hide */
+  }
+  .navbar h1{
+      font-size: 19px;
+      text-align: center;
+  }
 }
